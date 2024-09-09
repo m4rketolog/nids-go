@@ -1,1 +1,1 @@
-# nids-go
+# Network Intrusion Detection System
