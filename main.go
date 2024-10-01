@@ -15,7 +15,7 @@ import (
 )
 
 var whitelist = map[string]bool{
-	"192.168.0.178": true,
+	"": true,
 }
 
 func isWhitelisted(ip string) bool {
