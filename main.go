@@ -18,6 +18,14 @@ var whitelist = map[string]bool{
 	"": true,
 }
 
+var blacklist = map[string]bool{
+	"": true,
+}
+
+func isBlacklisted(ip string) bool {
+	return blacklist[ip]
+}
+
 func isWhitelisted(ip string) bool {
 	return whitelist[ip]
 }
@@ -42,15 +50,28 @@ func detectAnomalies(srcIP string) {
 	if !isWhitelisted(srcIP) {
 		synCounts[srcIP]++
 		if synCounts[srcIP] > 100 {
-
-			blockIp(srcIP)
-			fmt.Printf("ALERT: Possible SYN flood detected from IP %s\n", srcIP)
-
+			if !isBlacklisted(srcIP) {
+				blockIp(srcIP)
+				fmt.Printf("ALERT: Possible SYN flood detected from IP %s\n", srcIP)
+			}
 		}
+	} else {
+		fmt.Printf("Whitelisted IP Request from %s\n", srcIP)
 	}
 }
 
 func main() {
+
+	// Try to open ip whitelist and blacklist
+	err := loadIPListFromFile("whitelist.txt", whitelist)
+	if err != nil {
+		fmt.Printf("Error loading whitelist: %v\n", err)
+	}
+	err = loadIPListFromFile("blacklist.txt", blacklist)
+	if err != nil {
+		fmt.Printf("Error loading blacklist: %v\n", err)
+	}
+
 	handle, err := pcap.OpenLive("wlo1", 1600, true, pcap.BlockForever)
 	if err != nil {
 		log.Fatal(err)
